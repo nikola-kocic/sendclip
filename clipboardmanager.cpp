@@ -96,14 +96,15 @@ void ClipboardManager::reciveData()
         if (hostname == QHostInfo::localHostName())
             continue;
 
+        const QHostAddress ipv4addr(peerAddress.toIPv4Address());
         foreach (QString type, typeText.split(',')) {
             if (type == "text") {
-                QString url = QString("http://%1:%2/clipboard/text").arg(peerAddress.toString()).arg(port);
+                QString url = QString("http://%1:%2/clipboard/text").arg(ipv4addr.toString()).arg(port);
                 textReply = nmg->get(QNetworkRequest(url));
                 connect(textReply, &QNetworkReply::finished, this, &ClipboardManager::getTextFinish);
             }
             else if (type == "image") {
-                QString url = QString("http://%1:%2/clipboard/image").arg(peerAddress.toString()).arg(port);
+                QString url = QString("http://%1:%2/clipboard/image").arg(ipv4addr.toString()).arg(port);
                 imageReply = nmg->get(QNetworkRequest(url));
                 connect(imageReply, &QNetworkReply::finished, this, &ClipboardManager::getImageFinish);
             }
