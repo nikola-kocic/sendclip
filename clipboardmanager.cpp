@@ -12,6 +12,8 @@
 ClipboardManager::ClipboardManager(QObject *parent) : QObject(parent)
 {
     udpSocket = NULL;
+    timer = NULL;
+    currentText = "";
     nmg = new QNetworkAccessManager;
     QSettings settings;
     if (settings.value("username", "").toString().length() == 0)
@@ -201,6 +203,10 @@ void ClipboardManager::reload()
         udpSocket->close();
         delete udpSocket;
     }
+    if (timer) {
+        timer->stop();
+        delete timer;
+    }
     QSettings settings;
     username = settings.value("username", "someone").toString();
     key = settings.value("key", "l2kf322ldXD").toString();
@@ -218,6 +224,11 @@ void ClipboardManager::reload()
             this, SLOT(handleHttp(QHttpRequest*, QHttpResponse*)));
 
     server->listen(port);
+
+    timer = new QTimer(this);
+    timer->setInterval(200);
+    connect(timer, &QTimer::timeout, this, &ClipboardManager::pollClipboard);
+    timer->start();
 }
 
 void ClipboardManager::quit()
@@ -239,5 +250,15 @@ void ClipboardManager::iconActivated(QSystemTrayIcon::ActivationReason reason)
         break;
     default:
         break;
+    }
+}
+
+void ClipboardManager::pollClipboard()
+{
+    const QString clipboardText = QGuiApplication::clipboard()->text();
+    if(clipboardText != currentText) {
+        qDebug() << "clipboard changed";
+        currentText = clipboardText;
+        sendClipboard();
     }
 }

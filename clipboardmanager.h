@@ -32,6 +32,7 @@ public slots:
     void handleHttp(QHttpRequest *req, QHttpResponse *resp);
     void getTextFinish();
     void getImageFinish();
+    void pollClipboard();
 
 private:
     void createTrayMenu();
@@ -54,6 +55,9 @@ private:
     QString key;
     QNetworkAccessManager *nmg;
     QNetworkReply *textReply, *imageReply;
+
+    QTimer *timer;
+    QString currentText;
 };
 
 #endif // CLIPBOARDMANAGER_H
